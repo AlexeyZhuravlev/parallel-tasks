@@ -1,34 +1,6 @@
 #include <stdlib.h>
+#include "two_dim_array_operations.h"
 
-void allocate_two_dimentional_array(char*** array, int n, int m) {
-    int i;
-    *array = (char**)malloc(n * sizeof(char*));
-    for (i = 0; i < n; i++) {
-        (*array)[i] = (char*)malloc(m * sizeof(char));
-    }
-}
-
-void dipose_two_dimentional_array(char** array, int size) {
-    int i;
-    for (i = 0; i < size; i++)
-        free(array[i]);
-    free(array);
-}
-
-void copy_two_dimentional_array(char** from, char** to, int n, int m) {
-    int i, j;
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            to[i][j] = from[i][j];
-        }
-    }
-}
-
-int normalize_koordinate(int koordinate, int limit) {
-    if (koordinate < 0)
-        return limit - koordinate;
-    return koordinate % limit;
-}
 
 int number_of_neighbours(char** field, int n, int m, int i, int j) {
     int k, sum, neighbour_i, neighbour_j;
@@ -73,5 +45,5 @@ void calculate_not_parallel(char** field, int n, int m, int steps_number) {
        recalculate_position(field, new_field, n, m);
        copy_two_dimentional_array(new_field, field, n, m);
     }
-    dipose_two_dimentional_array(new_field, n);
+    dispose_two_dimentional_array(new_field, n);
 }

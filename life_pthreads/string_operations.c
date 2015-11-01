@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "two_dim_array_operations.h"
 
 #define REALLOC_PROBLEM 1;
 #define READING_PROBLEM 2;
@@ -85,7 +86,8 @@ void add_string_to_list(char*** list, char* string, int* length) {
 }
 
 /* One who uses parse_by_delimiter should free the allocated by function memory
- * with the call of function free_words_array before second usage with same arguments
+ * with the call of function dispose_two_dimentional_array 
+ * from "two_dim_array_operations.h" before second usage with same arguments
  * Example:
  * char** array;
  * int length;
@@ -116,10 +118,3 @@ void parse_by_delimiter(char* string, char delimiter,
     add_string_to_list(result, current_string, result_size); 
 }
 
-void free_words_array(char** array, int size) {
-    int i;
-    for (i = 0; i < size; i++) {
-        free(array[i]);
-    }
-    free(array);
-}
