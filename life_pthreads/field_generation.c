@@ -15,14 +15,14 @@ int read_field_from_file(FILE* file, char*** field, int* n, int* m) {
     *field = NULL;
     while (errorflag == 0 && safe_gets(file, &str) != EOF) {
         parse_by_delimiter(str, ',', &result, &size);
-        if ((*m) != 0) {
+        if ((*m) == 0) {
             *m = size;
         } else if ((*m) != size) {
             errorflag = 1;
         }
         current_line = (char*)malloc(size * sizeof(char));
         for (i = 0; i < size; i++) {
-            if (strcmp(result[i], "1") == 0 || strcmp(result[i], "0")) {
+            if (strcmp(result[i], "1") == 0 || strcmp(result[i], "0") == 0) {
                 current_line[i] = (result[i][0] - '0');
             } else {
                 errorflag = 1;
