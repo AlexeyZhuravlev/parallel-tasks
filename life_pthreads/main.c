@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ncurses.h>
 #include "string_operations.h"
 #include "non_parallel_life.h"
 #include "two_dim_array_operations.h"
@@ -17,8 +18,7 @@ int interpret_command(char** command_array, int command_array_length) {
            printf("Please enter initial distribution and number of threads\n");
        } else if (strcmp(command_array[1], "random") == 0) {
            if (command_array_length != 5) {
-               printf("For random initial distribution please type three numbers: \
-                       sizes of field, and number of threads\n");
+               printf("For random initial distribution please type three numbers: sizes of field, and number of threads\n");
            } else {
                if (field != NULL) {
                    dispose_two_dimentional_array(field, n);
@@ -30,8 +30,7 @@ int interpret_command(char** command_array, int command_array_length) {
            }
        } else if (strcmp(command_array[1], "file") == 0) {
           if (command_array_length != 4) {
-              printf("For initial distribution from file please type name of file: \
-                      and number of threads\n");
+              printf("For initial distribution from file please type name of file: and number of threads\n");
           } else {
               FILE* file;
               if (field != NULL) {
@@ -44,6 +43,8 @@ int interpret_command(char** command_array, int command_array_length) {
               fclose(file);
               k = atoi(command_array[3]);
           }
+       } else {
+           printf("Invalid option for start. Type \"random\" for random distribution or \"file\" for distribution from file.\n");
        }
        return 0;
     } else if (strcmp(command_array[0], "STATUS") == 0) {
@@ -58,7 +59,7 @@ int interpret_command(char** command_array, int command_array_length) {
         }
         return 0;
    } else if (strcmp(command_array[0], "STOP") == 0) {
-       printf("Not running anything to stop"); 
+       printf("Not running anything to stop\n"); 
        return 0;
     } else if (strcmp(command_array[0], "QUIT") == 0) {
         if (field != NULL) {
@@ -86,5 +87,6 @@ int main(int argc, char** argv) {
         free(command);
         dispose_two_dimentional_array(command_array, command_array_length);
     }
+    _nc_freeall();
     return 0;
 }
