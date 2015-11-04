@@ -30,7 +30,7 @@ void* life_computator(void* arg) {
     int i, j, step;
     struct segment_t borders = *((struct segment_t*)arg);
     for (step = 0; step < total_number_of_iterations; step++) {
-        for (i = borders.l; i< borders.r; i++) {
+        for (i = borders.l; i<= borders.r; i++) {
             for (j = 0; j < m; j++) {
                 recalculate_on_coordinate(field, new_field, n, m, i, j); 
              }
@@ -59,7 +59,7 @@ void distribute_segments(struct segment_t* segments) {
     int last = 0;
     for (i = 0; i < total_number_of_threads; i++) {
         segments[i].l = last;
-        segments[i].r = last + k;
+        segments[i].r = last + k - 1;
         if (border) {
             segments[i].r++;
             border--;
@@ -72,6 +72,8 @@ void init_parallel_mode() {
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&conditional, NULL);
     number_of_finished_treads = 0;
+    stop_immediately = 0;
+    number_of_active_threads = total_number_of_threads;
     allocate_two_dimentional_array(&new_field, n, m);
     segments = (struct segment_t*)
                     malloc(total_number_of_threads * sizeof(struct segment_t));
@@ -82,10 +84,10 @@ void init_parallel_mode() {
 void run_parallel(int number_of_threads, int number_of_iterations, 
                  char** passed_field, int passed_n, int passed_m) {
     int i;
-    if (number_of_threads > n)
-        number_of_threads = n;
     n = passed_n;
     m = passed_m;
+    if (number_of_threads > n)
+        number_of_threads = n;
     field = passed_field;
     total_number_of_threads = number_of_threads;
     total_number_of_iterations = number_of_iterations;
@@ -133,7 +135,8 @@ void completely_join() {
     finalize();
 }
 
-void stop() {
+int stop() {
     stop_immediately = 1;
     completely_join();
+    return total_number_of_iterations;
 }

@@ -1,5 +1,11 @@
 #include <stdlib.h>
 
+void two_dimentional_array_swap(char*** a, char*** b) {
+    char** c = *a;
+    *a = *b;
+    *b = c;
+}
+
 int normalize_koordinate(int koordinate, int limit) {
     if (koordinate < 0)
         return limit + koordinate;

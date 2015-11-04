@@ -43,7 +43,11 @@ void calculate_not_parallel(char** field, int n, int m, int steps_number) {
     allocate_two_dimentional_array(&new_field, n, m);
     for (step = 0; step < steps_number; step++) {
        recalculate_position(field, new_field, n, m);
-       copy_two_dimentional_array(new_field, field, n, m);
+       two_dimentional_array_swap(&field, &new_field);
+    }
+    if (steps_number % 2 == 1) {
+        two_dimentional_array_swap(&field, &new_field);
+        copy_two_dimentional_array(new_field, field, n, m);
     }
     dispose_two_dimentional_array(new_field, n);
 }
