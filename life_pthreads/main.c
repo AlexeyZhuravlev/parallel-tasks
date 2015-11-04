@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <ncurses.h>
 #include <time.h>
 #include "string_operations.h"
@@ -96,23 +96,27 @@ int interpret_command(char** command_array, int command_array_length) {
                 dispose_two_dimentional_array(field, n);
             } else {
                 int steps;
-                clock_t time;
-                double not_parallel_time, parallel_time;
+                struct timeval start, end;
+                int not_parallel_time, parallel_time;
                 n = atoi(command_array[1]);
                 m = atoi(command_array[2]);
                 k = atoi(command_array[3]);
                 steps = atoi(command_array[4]);
                 generate_field_at_random(n, m, &field);
-                time = clock();
+                gettimeofday(&start, NULL);
                 calculate_not_parallel(field, n, m, steps); 
-                not_parallel_time = difftime(clock(), time) / CLOCKS_PER_SEC;
-                time = clock();
+                gettimeofday(&end, NULL);
+                not_parallel_time = (end.tv_sec - start.tv_sec) * 1000000 
+                                     + (end.tv_usec - start.tv_usec);
+                printf("Not parallel: %d micosec\n", not_parallel_time);
+                gettimeofday(&start, NULL);
                 run_parallel(k, steps, field, n, m);
-                parallel_time = difftime(clock(), time) / CLOCKS_PER_SEC;
-                completely_join(); 
-                printf("Not parallel: %f sec\n", not_parallel_time);
-                printf("Parallel: %f sec\n", parallel_time);
-                printf("Acceleration: %f\n", not_parallel_time / parallel_time);
+                completely_join();
+                gettimeofday(&end, NULL);
+                parallel_time = (end.tv_sec - start.tv_sec) * 1000000 
+                                     + (end.tv_usec - start.tv_usec);
+                printf("Parallel: %d microsec\n", parallel_time);
+                printf("Acceleration: %f\n", (double)not_parallel_time / parallel_time);
                 dispose_two_dimentional_array(field, n);
                 field = NULL;
             }
