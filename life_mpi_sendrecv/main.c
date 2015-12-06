@@ -59,6 +59,7 @@ int main(int argc, char** argv) {
                 assert(field[i][j] == second_field[i][j]);
         dispose_two_dimentional_array(field, n);
         dispose_two_dimentional_array(second_field, n);
+        free(segments);
     } else {
         slave_computations(rank, m, k, number_of_nodes - 1);
     }
