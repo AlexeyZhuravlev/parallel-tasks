@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
         printf("Not parallel time: %f\n", not_parallel);
         printf("Acceleration: %f\n", not_parallel / parallel);
     } else {
-        slave_computations(rank, m, k, number_of_slaves);
+        slave_computations(rank, m, k, number_of_nodes - 1);
     }
     MPI_Finalize();
     return 0;
