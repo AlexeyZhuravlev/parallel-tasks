@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         time_point2 = MPI_Wall();
         not_parallel = time_point2 - time_point1;
         printf("Not parallel time: %f\n", not_parallel);
-        printf("Acceleration: %f\n", not_parallel / parallel)
+        printf("Acceleration: %f\n", not_parallel / parallel);
     } else {
         slave_computations(rank, m, k, number_of_slaves);
     }
