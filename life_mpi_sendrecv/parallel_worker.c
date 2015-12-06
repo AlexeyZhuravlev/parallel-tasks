@@ -70,8 +70,8 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
     for (k = 0; k < number_of_steps; k++) {
         MPI_Send(field[n - 2], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD);
         MPI_Send(field[1], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD);
-        MPI_Recv(field[n - 1], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD);
-        MPI_Recv(field[0], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD);
+        MPI_Recv(field[n - 1], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD, NULL);
+        MPI_Recv(field[0], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD, NULL);
         for (i = 1; i < n - 1; i++) {
             for (j = 0; j < m; j++) {
                 recalculate_on_coordinate(field, new_field, n, m, i, j);
@@ -80,7 +80,7 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
         two_dimentional_array_swap(&field, &new_field);
     }
     n -= 2;
-    translate_matrix_to_vector(field + 1, buffer, n, m);
+    translate_matrix_to_vector(field + 1, &buffer, n, m);
     MPI_Send(buffer, n * m, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     free(buffer);
     n += 2;
