@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <mpi.h>
 #include "field_generation.h"
 #include "parallel_worker.h"
+#include "non_parallel_life.h"
+#include "two_dim_array_operations.h"
 
 char** field;
+char** second_field;
 int n, m, k, number_of_nodes, rank;
 
 int main(int argc, char** argv) {
@@ -29,12 +33,15 @@ int main(int argc, char** argv) {
     }
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank == 0) {
+        int i, j;
         double time_point1, time_point2, parallel, not_parallel;
         int number_of_slaves = number_of_nodes - 1;
         struct segment_t* segments = (struct segment_t*)malloc(number_of_slaves * 
                                                            sizeof(struct segment_t));
         distribute_segments(segments, n, number_of_slaves);
         generate_field_at_random(n, m, &field);
+        allocate_two_dimentional_array(&second_field, n, m);
+        copy_two_dimentional_array(field, second_field, n, m);
         time_point1 = MPI_Wtime();
         send_field(segments, field, n, m, number_of_slaves);
         receive_field(segments, field, n, m, number_of_slaves);
@@ -42,11 +49,16 @@ int main(int argc, char** argv) {
         parallel = time_point2 - time_point1;
         printf("Elapsed calculations time: %f\n", parallel);
         time_point1 = MPI_Wtime();
-        calculate_not_parallel(field, n, m, k);
+        calculate_not_parallel(second_field, n, m, k);
         time_point2 = MPI_Wtime();
         not_parallel = time_point2 - time_point1;
         printf("Not parallel time: %f\n", not_parallel);
         printf("Acceleration: %f\n", not_parallel / parallel);
+        for (i = 0; i < n; i++)
+            for (j = 0; j < m; j++)
+                assert(field[i][j] == second_field[i][j]);
+        dispose_two_dimentional_array(field, n);
+        dispose_two_dimentional_array(second_field, n);
     } else {
         slave_computations(rank, m, k, number_of_nodes - 1);
     }

@@ -40,7 +40,7 @@ void translate_matrix_to_vector(char** matrix, char** vector, int n, int m) {
     int i;
     *vector = (char*)malloc(n * m * sizeof(char));
     for (i = 0; i < n * m; i++) {
-        (*vector)[i] = matrix[i / n][i % n];
+        (*vector)[i] = matrix[i / m][i % m];
     }
 }
 
@@ -48,7 +48,7 @@ void translate_vector_to_matrix(char* vector, char** matrix, int n, int m) {
     int i, j;
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
-            matrix[i][j] = vector[i * n + j];
+            matrix[i][j] = vector[i * m + j];
         }
     }
 }

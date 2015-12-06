@@ -36,12 +36,12 @@ void send_field(struct segment_t* segments, char** field, int n, int m,
 
 void receive_field(struct segment_t* segments, char** field, int n, int m, 
                    int number_of_slaves) {
-   int i, j;
+   int i;
    char* buffer;
    for (i = 0; i < number_of_slaves; i++) {
        int buffer_size = (segments[i].r - segments[i].l + 1) * m;
-       char* buffer = (char*)malloc(buffer_size * sizeof(char));
-       MPI_Recv(buffer, buffer_size, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD, NULL);
+       buffer = (char*)malloc(buffer_size * sizeof(char));
+       MPI_Recv(buffer, buffer_size, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
        translate_vector_to_matrix(buffer, field + segments[i].l, 
                                   segments[i].r - segments[i].l + 1, m);
        free(buffer);
@@ -53,9 +53,9 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
     char* buffer;
     char** field;
     char** new_field;
-    MPI_Recv(&n, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, NULL);
+    MPI_Recv(&n, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     buffer =(char*)malloc(n * m * sizeof(char));
-    MPI_Recv(buffer, n * m, MPI_CHAR, 0, 1, MPI_COMM_WORLD, NULL);
+    MPI_Recv(buffer, n * m, MPI_CHAR, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     n += 2;
     allocate_two_dimentional_array(&field, n, m);
     allocate_two_dimentional_array(&new_field, n, m);
@@ -68,10 +68,10 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
     if (right_rank > number_of_slaves)
         right_rank = 1;
     for (k = 0; k < number_of_steps; k++) {
-        MPI_Send(field[n - 2], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD);
-        MPI_Send(field[1], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD);
-        MPI_Recv(field[n - 1], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD, NULL);
-        MPI_Recv(field[0], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD, NULL);
+        MPI_Sendrecv(field[n - 2], m, MPI_CHAR, right_rank, k, 
+                     field[0], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Sendrecv(field[1], m, MPI_CHAR, left_rank, k,
+                     field[n - 1], m, MPI_CHAR, right_rank, k, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         for (i = 1; i < n - 1; i++) {
             for (j = 0; j < m; j++) {
                 recalculate_on_coordinate(field, new_field, n, m, i, j);
