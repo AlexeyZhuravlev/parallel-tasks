@@ -53,6 +53,8 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
     char* buffer;
     char** field;
     char** new_field;
+    char continuation_bit = 1;
+    MPI_Request request;
     MPI_Recv(&n, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     buffer =(char*)malloc(n * m * sizeof(char));
     MPI_Recv(buffer, n * m, MPI_CHAR, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -67,7 +69,21 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
     right_rank = rank + 1;
     if (right_rank > number_of_slaves)
         right_rank = 1;
+    if (rank == 1) {
+        MPI_Irecv(&continuation_bit, 1, MPI_CHAR, 0, 13, MPI_COMM_WORLD, &request); 
+    } else {
+        MPI_Irecv(&number_of_steps, 1, MPI_INT, 1, number_of_steps + 1, MPI_COMM_WORLD, &request);
+    }
     for (k = 0; k < number_of_steps; k++) {
+        if (rank == 1) {
+            if (continuation_bit == 0) {
+                int process;
+                for (process = 2; process < number_of_slaves + 1; process++) {
+                    MPI_Ssend(&k, 1, MPI_INT, process, number_of_steps + 1, MPI_COMM_WORLD);
+                }
+                number_of_steps = k;
+            }
+        }
         MPI_Sendrecv(field[n - 2], m, MPI_CHAR, right_rank, k, 
                      field[0], m, MPI_CHAR, left_rank, k, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Sendrecv(field[1], m, MPI_CHAR, left_rank, k,
@@ -79,6 +95,8 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
         }
         two_dimentional_array_swap(&field, &new_field);
     }
+    printf("Node %d finished on step %d\n", rank, number_of_steps);
+    MPI_Request_free(&request);
     n -= 2;
     translate_matrix_to_vector(field + 1, &buffer, n, m);
     MPI_Send(buffer, n * m, MPI_CHAR, 0, 0, MPI_COMM_WORLD);

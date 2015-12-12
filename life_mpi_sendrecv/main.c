@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <mpi.h>
+#include <unistd.h>
 #include "field_generation.h"
 #include "parallel_worker.h"
 #include "non_parallel_life.h"
@@ -44,6 +45,12 @@ int main(int argc, char** argv) {
         copy_two_dimentional_array(field, second_field, n, m);
         time_point1 = MPI_Wtime();
         send_field(segments, field, n, m, number_of_slaves);
+        /* Uncomment for checking stop after 5 seconds */
+        /*
+        sleep(5);
+        char stop = 0;
+        MPI_Send(&stop, 1, MPI_CHAR, 1, 13, MPI_COMM_WORLD);
+        */
         receive_field(segments, field, n, m, number_of_slaves);
         time_point2 = MPI_Wtime();
         parallel = time_point2 - time_point1;
