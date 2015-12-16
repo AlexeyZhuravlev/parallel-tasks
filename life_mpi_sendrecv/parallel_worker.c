@@ -78,11 +78,12 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
         if (rank == 1) {
             if (continuation_bit == 0) {
                 int process;
+                int u = k + number_of_slaves / 2 + 1;
                 for (process = 2; process < number_of_slaves + 1; process++) {
-                    int u = k + 1;
                     MPI_Ssend(&u, 1, MPI_INT, process, number_of_steps + 1, MPI_COMM_WORLD);
                 }
-                number_of_steps = k + 1;
+                number_of_steps = u;
+                continuation_bit = 1;
             }
         }
         MPI_Sendrecv(field[n - 2], m, MPI_CHAR, right_rank, k, 
@@ -97,9 +98,6 @@ void slave_computations(int rank, int m, int number_of_steps, int number_of_slav
         two_dimentional_array_swap(&field, &new_field);
     }
     printf("Node %d finished on step %d\n", rank, number_of_steps);
-    if (rank != 1) {
-        MPI_Wait(&request, MPI_STATUS_IGNORE);
-    }
     n -= 2;
     translate_matrix_to_vector(field + 1, &buffer, n, m);
     MPI_Send(buffer, n * m, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
